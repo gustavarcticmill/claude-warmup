@@ -1,0 +1,23 @@
+name: Claude Extra Account Code Warmup
+
+on:
+  schedule:
+    - cron: '15 3 * * 1-5'  
+  workflow_dispatch: {}
+
+jobs:
+  warmup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Ping Claude to anchor 5-hour window
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_EXTRA_OAUTH_TOKEN }}
+        run: |
+          mkdir -p ~/.claude
+          echo '{"hasCompletedOnboarding":true}' > ~/.claude.json
+          claude -p "hi" --model haiku --no-session-persistence 2>&1 || true
+          echo "✓ Warmup complete"
